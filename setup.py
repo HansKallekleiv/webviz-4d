@@ -22,6 +22,7 @@ setup(
     entry_points={
         "webviz_config_plugins": [
             "SurfaceViewer4D = webviz_4d.plugins:SurfaceViewer4D",
+            "SurfaceViewer4DSumo = webviz_4d.plugins:SurfaceViewer4DSumo",
         ]
     },
     install_requires=[

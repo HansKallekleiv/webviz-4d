@@ -13,8 +13,8 @@ class SumoConnection:
         ]
 
     @property
-    def ensembles_with_4d(self):
-        print(self.api.search(query="*", select="4d"))
+    def ensembles(self):
+        return [{"name": d["case"], "id": d["fmu_ensemble_id"]} for d in self._data]
 
     def _get_case(self, ensemble: dict):
         for case in self._data:
@@ -28,31 +28,26 @@ class SumoConnection:
 
     def get_surface_attributes_in_ensemble(self, ensemble: dict):
         surface_attrs = []
-        # print(self._get_case(ensemble))
         df = pd.DataFrame(columns=[])
         data = []
         for obj in self._get_case(ensemble):
             content = obj.get("_source")
-
-            # print(obj.get("data_type"))
-            # print(content.get("4d"))
             if content.get("data_type") == "surface" and content.get("4d"):
                 data.append(
                     {
-                        "fmu_id.realization": content.get("realization").get("id"),
-                        "fmu_id.ensemble": content.get("fmu_ensemble_id"),
+                        "fmu_id.realization": f"realization-{content.get('realization').get('id')}",
+                        "fmu_id.ensemble": ensemble["name"],
                         "map_type": "observed"
                         if content.get("4d").get("is_observation")
                         else "simulated",
                         "data.name": content.get("name"),
-                        "data.content": content.get("4d").get("attribute"),
+                        "data.content": f"{content.get('content')}_{content.get('4d').get('attribute')}",
                         "data.time.t1": content.get("time").get("t1"),
                         "data.time.t2": content.get("time").get("t2"),
                         "statistics": "",
-                        "filename": content.get("_sumo").get("blob_url"),
+                        "filename": obj.get("_id"),
                     }
                 )
-            # surface_attrs.append(obj.get("_source"))
         return pd.DataFrame(data)
 
     def get_realizations_for_attribute(self, ensemble: str, attribute: str):
@@ -83,11 +78,11 @@ class SumoConnection:
         pass
 
 
-conn = SumoConnection()
-print(conn.ensembles_with_4d)
+# conn = SumoConnection()
+# # print(conn.ensembles_with_4d)
 # data = []
-for ens in conn.ensembles:
-    data.append(conn.get_surface_attributes_in_ensemble(ensemble=ens))
+# for ens in conn.ensembles:
+#     data.append(conn.get_surface_attributes_in_ensemble(ensemble=ens))
 # print(pd.concat(data))
 # pd.concat(data).to_csv("data.csv", index=False)
 # # data.append(conn.get_surface_attributes_in_ensemble(ensemble=ens))

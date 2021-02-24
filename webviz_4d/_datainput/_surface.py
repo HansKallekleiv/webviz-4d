@@ -1,3 +1,4 @@
+from io import BytesIO
 import math
 import numpy as np
 import numpy.ma as ma
@@ -11,6 +12,15 @@ from .image_processing import array_to_png, get_colormap
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
 def load_surface(surface_path):
     return RegularSurface(surface_path)
+
+
+# @CACHE.memoize(timeout=CACHE.TIMEOUT)
+def load_surface_from_blob(api, blob_path):
+    # return
+    print(blob_path)
+    bytestring = api.get_blob(blob_path)
+    return RegularSurface().from_file(BytesIO(bytestring), fformat="irap_binary")
+    # return RegularSurface(surface_path)
 
 
 @CACHE.memoize(timeout=CACHE.TIMEOUT)
